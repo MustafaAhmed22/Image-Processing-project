@@ -1,0 +1,53 @@
+function [Ldiag] = triangle(Img)
+
+cond = 0;
+
+%Img = im2double(Img);
+[h w] = size(Img);
+%I = rgb2gray(Img);
+
+Edg = edge(Img,'Canny');
+se = strel('line',11,90);
+bw2 = imerode(Edg,se);
+% bw2 = imdilate(Edg,se);
+figure,imshow(bw2);
+
+[Houghtrans, Theta, Rho] = hough(bw2);
+
+Peaks = houghpeaks(Houghtrans, 16000);
+
+linesegm = houghlines(Edg,Theta,Rho,Peaks,'FillGap',5,'MinLength',20);
+Ldiag = [];
+
+max = 0;
+lent = length(linesegm);
+
+for i = 1:lent
+   
+    xycord = [linesegm(i).point1 ; linesegm(i).point2];
+    cond1 = linesegm(i).theta >25 && linesegm(i).theta <50;
+    cond2 = linesegm(i).theta <-25 && linesegm(i).theta > -50;
+    
+    if(cond1)
+        
+        Ldiag = [Ldiag ; linesegm(i)];
+        
+    end
+    
+    if(cond2)
+    
+        Ldiag = [Ldiag;linesegm(i)];
+        
+    end
+    
+    lengt = norm(linesegm(i).point1 - linesegm(i).point2);
+    
+    if(lengt > max || cond2 || cond2)
+       
+        max = lengt;
+        xyline = xycord;
+        
+    end
+end
+
+end
